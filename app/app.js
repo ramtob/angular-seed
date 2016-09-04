@@ -2,13 +2,35 @@
 
 // Declare app level module which depends on views, and components
 angular.module('myApp', [
-  'ngRoute',
-  'myApp.view1',
-  'myApp.view2',
-  'myApp.version'
+    'ui.router',
+    'viewForceHorse',
+    'forceHorse',
+    'ngMaterial'
 ]).
-config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
-  $locationProvider.hashPrefix('!');
+    config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+        $urlRouterProvider.otherwise('/home/viewForceHorse');
 
-  $routeProvider.otherwise({redirectTo: '/view1'});
-}]);
+        $stateProvider.state('index', {
+            url: "/home",
+            templateUrl: 'views/main.html',
+            controller: 'mainCtrl as mainCtrl',
+            data: {
+                title: 'Home'
+            }
+        });
+
+    }])
+
+    .controller('mainCtrl', ['$rootScope', '$state', '$stateParams', function ($rootScope, $state /*, $stateParams*/) {
+        var vm = this;
+        vm.viewName = $state.current.data.title;
+        vm.menuItems = $state.get();
+
+        $rootScope.$on('$stateChangeSuccess',
+            function (event, toState /*, toParams, fromState, fromParams*/) {
+                vm.viewName = toState.data.title;
+            }
+        )
+
+
+    }]);
