@@ -11,7 +11,7 @@
     "angular-ui-router": "~0.2.15",
     "angular-mocks": "~1.5.0",
     "html5-boilerplate": "^5.3.0",
-    "force-horse": "~0.2.0"
+    "force-horse": "*"
   },
   "resolutions": {
     "html5-boilerplate": "^5.3.0",
