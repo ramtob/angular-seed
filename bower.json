@@ -1,22 +1,22 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
+  "name": "force-horse-demo",
+  "description": "A demo app for the force-horse components",
   "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
+  "homepage": "https://github.com/ramtob/force-horse-demo",
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "angular": "~1.5.0",
+    "angular": "~1.4.9",
     "angular-route": "~1.4.0",
     "angular-ui-router": "~0.2.15",
-    "angular-mocks": "~1.5.0",
+    "angular-material": "~0.10.1",
     "html5-boilerplate": "^5.3.0",
     "force-horse": "*"
   },
+  "devDependencies": {
+    "angular-mocks": "~1.4.0"
+  },
   "resolutions": {
-    "html5-boilerplate": "^5.3.0",
-    "angular": "1.4.12",
-    "angular-mocks": "~1.5.0",
-    "angular-loader": "~1.5.0"
+    "angular": "1.4.12"
   }
 }
