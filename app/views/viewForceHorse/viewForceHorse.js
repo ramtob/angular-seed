@@ -260,7 +260,7 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
                 var i, node, edge, nodeIdx,
                     alephbet = "abcdefghijklmnopqrstuvwxyz0123456789",
                     //alephbet = "abcdefghijklmnopqrstuvwxyz0123456789אבגדהוזחטיכלמנסעפצקרשת",
-                shapes = d3.svg.symbolTypes;
+                shapes = d3.symbols;
                 for (i = 0; i < numOfNodes; i++) {
                     node = graphData[constants.NODES].data[i] = {};
                     node.class = constants.CLASS_NODE;
