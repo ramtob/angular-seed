@@ -309,7 +309,7 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
         MAX_WEIGHT: 4,
         LABEL_LENGTH: 5,
         PREDEFINED_FILES: ['footballBarcelona', 'Les Miserables', 'FSQ 100', 'FSQ 1000'],
-        FILES_SERVER_ADDR: 'https://dl.dropboxusercontent.com/u/28910567/'
+        FILES_SERVER_ADDR: '/force-horse-demo/app/assets/'
     })
 
 
