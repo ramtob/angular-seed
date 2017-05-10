@@ -246,8 +246,7 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
     .service('graphData', ['ViewForceHorseConstants', 'graphDataHelper', function (constants, helper) {
         return {
             //---------------------------------------------------
-            // get
-            // Get random data for the graph
+            // Get data for a random graph
             //---------------------------------------------------
             getRandomData: function (numOfNodes) {
                 var graphData = [
@@ -259,25 +258,27 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
 
                 var i, node, edge, nodeIdx;
                 for (i = 0; i < numOfNodes; i++) {
-                    node = graphData[constants.NODES].data[i] = {};
-                    helper.fillNodeAttributes(node, i);
+                    helper.fillNodeAttributes(i, graphData[constants.NODES].data);
                     // node.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
                 }
 
                 var numEdges = numOfNodes * 3 / 2;
                 for (i = 0; i < numEdges; i++) {
-                    edge = graphData[constants.EDGES].data[i] = {};
-                    helper.fillEdgeAttributes(edge, i,
+                    helper.fillEdgeAttributes(i,
                         Math.floor(Math.random() * numOfNodes),
                         Math.floor(Math.random() * numOfNodes),
-                        graphData[constants.NODES].data
+                        graphData[constants.NODES].data,
+                        graphData[constants.EDGES].data
                     );
                     // edge.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
                 }
 
                 return graphData;
-            }
+            },
 
+            getRandomScaleFreeGraphData: function (numOfNodes) {
+
+            }
 
         }; // return
     }])
@@ -286,7 +287,8 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
     //---------------------------------------------------------------//
     .service('graphDataHelper', ['ViewForceHorseConstants', function (constants) {
         return {
-            fillNodeAttributes: function(node, nodeIndex) {
+            fillNodeAttributes: function(nodeIndex, nodesArray) {
+                var node = nodesArray[nodeIndex] = {};
                 node.class = constants.CLASS_NODE;
                 node.label = (new Array(constants.LABEL_LENGTH)).fill(null).map(function() { return constants.ALEPHBET.charAt(Math.floor(Math.random() * constants.ALEPHBET.length)); }).join('');
                 node.shape = d3.symbols[Math.floor(Math.random() * d3.symbols.length)];
@@ -294,7 +296,8 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
                 node.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
             },
 
-            fillEdgeAttributes: function(edge, edgeIdx, sourceNodeIdx, targetNodeIdx, nodesArray) {
+            fillEdgeAttributes: function(edgeIdx, sourceNodeIdx, targetNodeIdx, nodesArray, edgesArray) {
+                var edge = edgesArray[edgeIdx] = {};
                 edge.class = constants.CLASS_EDGE;
                 edge.source = sourceNodeIdx;
                 edge.sourceLabel = nodesArray[sourceNodeIdx].label;
