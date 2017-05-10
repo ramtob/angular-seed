@@ -243,7 +243,7 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
 
 
     //---------------------------------------------------------------//
-    .service('graphData', ['ViewForceHorseConstants', function (constants) {
+    .service('graphData', ['ViewForceHorseConstants', 'graphDataHelper', function (constants, helper) {
         return {
             //---------------------------------------------------
             // get
@@ -257,34 +257,22 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
 
                 // Generate a random graph
 
-                var i, node, edge, nodeIdx,
-                    alephbet = "abcdefghijklmnopqrstuvwxyz0123456789",
-                    //alephbet = "abcdefghijklmnopqrstuvwxyz0123456789אבגדהוזחטיכלמנסעפצקרשת",
-                shapes = d3.symbols;
+                var i, node, edge, nodeIdx;
                 for (i = 0; i < numOfNodes; i++) {
                     node = graphData[constants.NODES].data[i] = {};
-                    node.class = constants.CLASS_NODE;
-                    node.label = (new Array(constants.LABEL_LENGTH)).fill(null).map(function() { return alephbet.charAt(Math.floor(Math.random() * alephbet.length)); }).join('');
-                    //node.label = Math.random().toString(36).slice(2).substr(0, 5); // a random string, 5 chars
-                    node.shape = shapes[Math.floor(Math.random() * shapes.length)];
-                    node.id = i;
-                    node.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
-                    node.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
+                    helper.fillNodeAttributes(node, i);
+                    // node.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
                 }
 
                 var numEdges = numOfNodes * 3 / 2;
                 for (i = 0; i < numEdges; i++) {
                     edge = graphData[constants.EDGES].data[i] = {};
-                    edge.class = constants.CLASS_EDGE;
-                    nodeIdx = Math.floor(Math.random() * numOfNodes);
-                    edge.sourceID = graphData[constants.NODES].data[nodeIdx].id;
-                    edge.sourceLabel = graphData[constants.NODES].data[nodeIdx].label;
-                    nodeIdx = Math.floor(Math.random() * numOfNodes);
-                    edge.targetID = graphData[constants.NODES].data[nodeIdx].id;
-                    edge.targetLabel = graphData[constants.NODES].data[nodeIdx].label;
-                    edge.id = i;
-                    edge.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
-                    edge.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
+                    helper.fillEdgeAttributes(edge, i,
+                        Math.floor(Math.random() * numOfNodes),
+                        Math.floor(Math.random() * numOfNodes),
+                        graphData[constants.NODES].data
+                    );
+                    // edge.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
                 }
 
                 return graphData;
@@ -292,6 +280,30 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
 
 
         }; // return
+    }])
+
+
+    //---------------------------------------------------------------//
+    .service('graphDataHelper', ['ViewForceHorseConstants', function (constants) {
+        return {
+            fillNodeAttributes: function(node, nodeIndex) {
+                node.class = constants.CLASS_NODE;
+                node.label = (new Array(constants.LABEL_LENGTH)).fill(null).map(function() { return constants.ALEPHBET.charAt(Math.floor(Math.random() * constants.ALEPHBET.length)); }).join('');
+                node.shape = d3.symbols[Math.floor(Math.random() * d3.symbols.length)];
+                node.id = nodeIndex;
+                node.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
+            },
+
+            fillEdgeAttributes: function(edge, edgeIdx, sourceNodeIdx, targetNodeIdx, nodesArray) {
+                edge.class = constants.CLASS_EDGE;
+                edge.source = sourceNodeIdx;
+                edge.sourceLabel = nodesArray[sourceNodeIdx].label;
+                edge.target = targetNodeIdx;
+                edge.targetLabel = nodesArray[targetNodeIdx].label;
+                edge.id = edgeIdx;
+                edge.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
+            }
+        };
     }])
 
 
@@ -309,7 +321,8 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
         MAX_WEIGHT: 4,
         LABEL_LENGTH: 5,
         PREDEFINED_FILES: ['footballBarcelona', 'Les Miserables', 'FSQ 100', 'FSQ 1000'],
-        FILES_SERVER_ADDR: '/force-horse-demo/app/assets/'
+        FILES_SERVER_ADDR: '/force-horse-demo/app/assets/',
+        ALEPHBET: "abcdefghijklmnopqrstuvwxyz0123456789"
     })
 
 
