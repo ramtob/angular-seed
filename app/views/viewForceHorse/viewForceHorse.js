@@ -276,8 +276,27 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
                 return graphData;
             },
 
-            getRandomScaleFreeGraphData: function (numOfNodes) {
+            getRandomScaleFreeGraphData: function (requiredNumOfNodes) {
 
+                // Start with two connected nodes
+                var nodes = [],
+                    currentNumOfNodes = 0;
+                helper.fillNodeAttributes(currentNumOfNodes++, nodes);
+                helper.fillNodeAttributes(currentNumOfNodes++, nodes);
+                var edges = [];
+                helper.fillEdgeAttributes(0, 0, 1, nodes, edges);
+                // An array for preferential attachment distribution selection
+                var selectionArray = [0, 1],
+                    selectionArrayLength = 2,
+                    randomIndex;
+
+                // Added nodes one by one, add edges with preferential attachment distribution
+                while (currentNumOfNodes < requiredNumOfNodes) {
+                    // allocate a new node
+                    helper.fillNodeAttributes(currentNumOfNodes++, nodes);
+                    // get random index in selection array
+                    randomIndex = _.random(0, selectionArrayLength - 1);
+                }
             }
 
         }; // return
