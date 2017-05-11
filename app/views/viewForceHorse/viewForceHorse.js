@@ -259,18 +259,16 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
                 var i, node, edge, nodeIdx;
                 for (i = 0; i < numOfNodes; i++) {
                     helper.fillNodeAttributes(i, graphData[constants.NODES].data);
-                    // node.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
                 }
 
                 var numEdges = numOfNodes * 3 / 2;
                 for (i = 0; i < numEdges; i++) {
-                    helper.fillEdgeAttributes(i,
+                    helper.AddEdgeWithAttributes(
                         Math.floor(Math.random() * numOfNodes),
                         Math.floor(Math.random() * numOfNodes),
                         graphData[constants.NODES].data,
                         graphData[constants.EDGES].data
                     );
-                    // edge.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
                 }
 
                 return graphData;
@@ -284,18 +282,28 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
                 helper.fillNodeAttributes(currentNumOfNodes++, nodes);
                 helper.fillNodeAttributes(currentNumOfNodes++, nodes);
                 var edges = [];
-                helper.fillEdgeAttributes(0, 0, 1, nodes, edges);
+                helper.AddEdgeWithAttributes(0, 1, nodes, edges);
                 // An array for preferential attachment distribution selection
                 var selectionArray = [0, 1],
                     selectionArrayLength = 2,
                     randomIndex;
 
-                // Added nodes one by one, add edges with preferential attachment distribution
+                // Add nodes one by one, add edges with preferential attachment distribution
                 while (currentNumOfNodes < requiredNumOfNodes) {
                     // allocate a new node
                     helper.fillNodeAttributes(currentNumOfNodes++, nodes);
                     // get random index in selection array
                     randomIndex = _.random(0, selectionArrayLength - 1);
+                    // connect the new node to the randomally selected one
+                    helper.AddEdgeWithAttributes(currentNumOfNodes-1, selectionArray[randomIndex]);
+                    // add the indexes of the newly connected nodes to the selection array
+                    selectionArray.push(currentNumOfNodes-1);
+                    selectionArray.push(selectionArray[randomIndex]);
+                    selectionArrayLength += 2;
+                }
+                return {
+                    nodes: nodes,
+                    links: edges
                 }
             }
 
@@ -313,17 +321,20 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
                 node.shape = d3.symbols[Math.floor(Math.random() * d3.symbols.length)];
                 node.id = nodeIndex;
                 node.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
+                // node.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
             },
 
-            fillEdgeAttributes: function(edgeIdx, sourceNodeIdx, targetNodeIdx, nodesArray, edgesArray) {
-                var edge = edgesArray[edgeIdx] = {};
+            AddEdgeWithAttributes: function(sourceNodeIdx, targetNodeIdx, nodesArray, edgesArray) {
+                var edge = {};
                 edge.class = constants.CLASS_EDGE;
                 edge.source = sourceNodeIdx;
                 edge.sourceLabel = nodesArray[sourceNodeIdx].label;
                 edge.target = targetNodeIdx;
                 edge.targetLabel = nodesArray[targetNodeIdx].label;
-                edge.id = edgeIdx;
                 edge.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
+                // edge.id = edgeIdx;
+                // edge.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
+                edgesArray.push(edge);
             }
         };
     }])
