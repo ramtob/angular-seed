@@ -256,7 +256,7 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
 
                 // Generate a random graph
 
-                var i, node, edge, nodeIdx;
+                var i;
                 for (i = 0; i < numOfNodes; i++) {
                     helper.fillNodeAttributes(i, graphData[constants.NODES].data);
                 }
@@ -295,7 +295,7 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
                     // get random index in selection array
                     randomIndex = _.random(0, selectionArrayLength - 1);
                     // connect the new node to the randomally selected one
-                    helper.AddEdgeWithAttributes(currentNumOfNodes-1, selectionArray[randomIndex]);
+                    helper.AddEdgeWithAttributes(currentNumOfNodes-1, selectionArray[randomIndex], nodes, edges);
                     // add the indexes of the newly connected nodes to the selection array
                     selectionArray.push(currentNumOfNodes-1);
                     selectionArray.push(selectionArray[randomIndex]);

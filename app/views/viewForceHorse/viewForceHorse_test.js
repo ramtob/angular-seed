@@ -1,16 +1,18 @@
 'use strict';
 
-xdescribe('myApp.view2 module', function() {
+describe('viewForceHorse module', function () {
+    var graphData;
 
-  beforeEach(module('myApp.view2'));
+    beforeEach(module('viewForceHorse'));
 
-  describe('view2 controller', function(){
-
-    it('should ....', inject(function($controller) {
-      //spec body
-      var view2Ctrl = $controller('View2Ctrl');
-      expect(view2Ctrl).toBeDefined();
+    beforeEach(inject(function(_graphData_) {
+        graphData = _graphData_;
     }));
 
-  });
+    describe('graphData service', function () {
+        it('should be defined', function () {
+            expect(graphData).toBeDefined();
+        })
+    });
+
 });
