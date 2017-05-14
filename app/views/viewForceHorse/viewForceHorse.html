@@ -11,15 +11,27 @@
         <div flex="" layout="column">
             <!--<div layout="row" layout-padding="">Last hovered node = {{lastHoveredNode.label}}</div>-->
             <div flex layout="row" layout-margin="" layout-align="space-between center">
-                <label flex="30" for="numOfNodes">Number of nodes:</label>
-                <input flex="15" type="text" pattern="\d+" ng-model="ctrl.numOfNodes" size="4" title="number of nodes to generate">
+                <button flex="30" ng-click="ctrl.createRandomGraph()">Create random graph</button>
+                <input flex="15" type="text" pattern="\d+" ng-model="ctrl.numOfNodes" size="4"
+                       title="number of nodes to generate">
                 <input flex="15" type="range" id="numOfNodes" ng-model="ctrl.numOfNodes" min="10" max="1000">
-                <button flex="" ng-click="ctrl.createRandomGraph()">Create random graph</button>
+                <label>
+                    <input flex="" type="checkbox" ng-model="ctrl.isScaleFree">
+                    Scale Free
+                </label>
+            </div>
+            <div flex layout="row" layout-align="start center">
+                <label layout="row" layout-margin="" layout-align="start center">
+                    <input flex type="checkbox" ng-model="ctrl.randomizeColors">
+                    Randomize colors and shapes
+                </label>
             </div>
             <div flex layout="row" layout-margin="" layout-align="start center">
                 <label flex="30" for="predefined-file-read">Predefined demo files:</label>
-                <select flex="" id="predefined-file-read" ng-model="ctrl.predefinedFile" ng-change="ctrl.createGraphFromPredefinedFile()">
-                    <option ng-repeat="fileName in ctrl.constants.PREDEFINED_FILES" value="{{fileName}}">{{fileName}}</option>
+                <select flex="" id="predefined-file-read" ng-model="ctrl.predefinedFile"
+                        ng-change="ctrl.createGraphFromPredefinedFile()">
+                    <option ng-repeat="fileName in ctrl.constants.PREDEFINED_FILES" value="{{fileName}}">{{fileName}}
+                    </option>
                 </select>
                 <!--<button flex="20" ng-click="ctrl.createGraphFromPredefinedFile()">Load file</button>-->
             </div>
@@ -51,9 +63,9 @@
                 </md-virtual-repeat-container>
             </div>
             <div flex layout="column">
-                <h3>Edges                <i class="mdi mdi-filter"
-                                            title="Remove selected elements"
-                                            ng-click="ctrl.onFilterInside()"></i>
+                <h3>Edges <i class="mdi mdi-filter"
+                             title="Remove selected elements"
+                             ng-click="ctrl.onFilterInside()"></i>
                 </h3>
                 <md-virtual-repeat-container flex="">
                     <table class="edges-table" flex>

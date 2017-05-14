@@ -34,6 +34,9 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
             ]
         };
 
+        // set defaults
+        vm.isScaleFree = true;
+        vm.randomizeColors = false;
         vm.predefinedFile = 'footballBarcelona';
         createGraphFromPredefinedFile();
         // vm.options.data = graphData.getRandomData(vm.numOfNodes = constants.INITIAL_NUM_OF_NODES);
@@ -65,7 +68,9 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
         vm.EDGES = constants.EDGES;
 
         vm.createRandomGraph = function () {
-            vm.options.data = graphData.getRandomData(vm.numOfNodes);
+            vm.options.data = vm.isScaleFree ?
+                graphData.getRandomScaleFreeGraphData(vm.numOfNodes, vm.randomizeColors) :
+                graphData.getRandomData(vm.numOfNodes, vm.randomizeColors);
             vm.setArrays();
             vm.options.forceHorseInstance.redraw();
         };
@@ -243,13 +248,12 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
 
 
     //---------------------------------------------------------------//
-    .service('graphData', ['ViewForceHorseConstants', function (constants) {
+    .service('graphData', ['ViewForceHorseConstants', 'graphDataHelper', function (constants, helper) {
         return {
             //---------------------------------------------------
-            // get
-            // Get random data for the graph
+            // Get data for a random graph
             //---------------------------------------------------
-            getRandomData: function (numOfNodes) {
+            getRandomData: function (numOfNodes, randomizeColors) {
                 var graphData = [
                     {id: constants.NODES_ID, data: []},
                     {id: constants.EDGES_ID, data: []}
@@ -257,41 +261,95 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
 
                 // Generate a random graph
 
-                var i, node, edge, nodeIdx,
-                    alephbet = "abcdefghijklmnopqrstuvwxyz0123456789",
-                    //alephbet = "abcdefghijklmnopqrstuvwxyz0123456789אבגדהוזחטיכלמנסעפצקרשת",
-                shapes = d3.symbols;
+                var i;
                 for (i = 0; i < numOfNodes; i++) {
-                    node = graphData[constants.NODES].data[i] = {};
-                    node.class = constants.CLASS_NODE;
-                    node.label = (new Array(constants.LABEL_LENGTH)).fill(null).map(function() { return alephbet.charAt(Math.floor(Math.random() * alephbet.length)); }).join('');
-                    //node.label = Math.random().toString(36).slice(2).substr(0, 5); // a random string, 5 chars
-                    node.shape = shapes[Math.floor(Math.random() * shapes.length)];
-                    node.id = i;
-                    node.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
-                    node.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
+                    helper.fillNodeAttributes(i, graphData[constants.NODES].data, randomizeColors);
                 }
 
                 var numEdges = numOfNodes * 3 / 2;
                 for (i = 0; i < numEdges; i++) {
-                    edge = graphData[constants.EDGES].data[i] = {};
-                    edge.class = constants.CLASS_EDGE;
-                    nodeIdx = Math.floor(Math.random() * numOfNodes);
-                    edge.sourceID = graphData[constants.NODES].data[nodeIdx].id;
-                    edge.sourceLabel = graphData[constants.NODES].data[nodeIdx].label;
-                    nodeIdx = Math.floor(Math.random() * numOfNodes);
-                    edge.targetID = graphData[constants.NODES].data[nodeIdx].id;
-                    edge.targetLabel = graphData[constants.NODES].data[nodeIdx].label;
-                    edge.id = i;
-                    edge.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
-                    edge.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
+                    helper.AddEdgeWithAttributes(
+                        Math.floor(Math.random() * numOfNodes),
+                        Math.floor(Math.random() * numOfNodes),
+                        graphData[constants.NODES].data,
+                        graphData[constants.EDGES].data,
+                        randomizeColors
+                    );
                 }
 
                 return graphData;
+            },
+
+            getRandomScaleFreeGraphData: function (requiredNumOfNodes, randomizeColors) {
+
+                // Start with two connected nodes
+                var nodes = [],
+                    currentNumOfNodes = 0;
+                helper.fillNodeAttributes(currentNumOfNodes++, nodes, randomizeColors);
+                helper.fillNodeAttributes(currentNumOfNodes++, nodes, randomizeColors);
+                var edges = [];
+                helper.AddEdgeWithAttributes(0, 1, nodes, edges, randomizeColors);
+                // An array for preferential attachment distribution selection
+                var selectionArray = [0, 1],
+                    selectionArrayLength = 2,
+                    randomIndex;
+
+                // Add nodes one by one, add edges with preferential attachment distribution
+                while (currentNumOfNodes < requiredNumOfNodes) {
+                    // allocate a new node
+                    helper.fillNodeAttributes(currentNumOfNodes++, nodes, randomizeColors);
+                    // get random index in selection array
+                    randomIndex = _.random(0, selectionArrayLength - 1);
+                    // connect the new node to the randomally selected one
+                    helper.AddEdgeWithAttributes(currentNumOfNodes-1, selectionArray[randomIndex],
+                        nodes, edges, randomizeColors);
+                    // add the indexes of the newly connected nodes to the selection array
+                    selectionArray.push(currentNumOfNodes-1);
+                    selectionArray.push(selectionArray[randomIndex]);
+                    selectionArrayLength += 2;
+                }
+                return [
+                    {id: constants.NODES_ID, data: nodes},
+                    {id: constants.EDGES_ID, data: edges}
+                ]
             }
 
-
         }; // return
+    }])
+
+
+    //---------------------------------------------------------------//
+    .service('graphDataHelper', ['ViewForceHorseConstants', function (constants) {
+        return {
+            fillNodeAttributes: function(nodeIndex, nodesArray, randomizeColors) {
+                var node = nodesArray[nodeIndex] = {};
+                node.class = constants.CLASS_NODE;
+                node.label = (new Array(constants.LABEL_LENGTH)).fill(null).map(function() { return constants.ALEPHBET.charAt(Math.floor(Math.random() * constants.ALEPHBET.length)); }).join('');
+                node.id = nodeIndex;
+                if (randomizeColors) {
+                    node.shape = d3.symbols[Math.floor(Math.random() * d3.symbols.length)];
+                    node.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
+                    // node.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
+                } else {
+                    node.shape = d3.symbolCircle;
+                }
+            },
+
+            AddEdgeWithAttributes: function(sourceNodeIdx, targetNodeIdx, nodesArray, edgesArray, randomizeColors) {
+                var edge = {};
+                edge.class = constants.CLASS_EDGE;
+                edge.source = sourceNodeIdx;
+                edge.sourceLabel = nodesArray[sourceNodeIdx].label;
+                edge.target = targetNodeIdx;
+                edge.targetLabel = nodesArray[targetNodeIdx].label;
+                // edge.id = edgeIdx;
+                if (randomizeColors) {
+                    edge.color = '#' + Math.floor(Math.random() * constants.MAX_COLOR).toString(16);
+                    // edge.weight = constants.MIN_WEIGHT + Math.floor(Math.random() * (constants.MAX_WEIGHT - constants.MIN_WEIGHT + 1));
+                }
+                edgesArray.push(edge);
+            }
+        };
     }])
 
 
@@ -309,7 +367,8 @@ angular.module('viewForceHorse', ['ui.router', 'forceHorse'])
         MAX_WEIGHT: 4,
         LABEL_LENGTH: 5,
         PREDEFINED_FILES: ['footballBarcelona', 'Les Miserables', 'FSQ 100', 'FSQ 1000'],
-        FILES_SERVER_ADDR: '/force-horse-demo/app/assets/'
+        FILES_SERVER_ADDR: '/force-horse-demo/app/assets/',
+        ALEPHBET: "abcdefghijklmnopqrstuvwxyz0123456789"
     })
 
 
