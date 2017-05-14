@@ -1,12 +1,13 @@
 'use strict';
 
 describe('viewForceHorse module', function () {
-    var graphDataSrv;
+    var graphDataSrv, constants;
 
     beforeEach(module('viewForceHorse'));
 
-    beforeEach(inject(function(_graphData_) {
+    beforeEach(inject(function(_graphData_, ViewForceHorseConstants) {
         graphDataSrv = _graphData_;
+        constants = ViewForceHorseConstants;
     }));
 
     describe('graphData service', function () {
@@ -15,11 +16,14 @@ describe('viewForceHorse module', function () {
         });
 
         describe('getRandomScaleFreeGraphData()', function () {
-            var graph;
+            var graph, nodes, links;
             it ('should return a graph', function () {
                 graph = graphDataSrv.getRandomScaleFreeGraphData(10);
-                expect(graph.nodes).toBeDefined();
-                expect(graph.links).toBeDefined();
+                nodes = graph[0].data;
+                links = graph[1].data;
+                expect(nodes).toBeDefined();
+                expect(links).toBeDefined();
+                expect(nodes.length).toEqual(10);
             });
         })
     });
